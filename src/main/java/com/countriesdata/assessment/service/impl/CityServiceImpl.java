@@ -1,7 +1,7 @@
 package com.countriesdata.assessment.service.impl;
 
 import com.countriesdata.assessment.config.ApiClient;
-import com.countriesdata.assessment.dto.CityPopulationDTO;
+import com.countriesdata.assessment.dto.CityPopulationData;
 import com.countriesdata.assessment.service.CityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,8 +15,8 @@ import java.util.stream.Collectors;
 public class CityServiceImpl implements CityService {
     private final ApiClient apiClient;
     @Override
-    public List<CityPopulationDTO> getMostPopulatedCities(int cityNumber) {
-        List<CityPopulationDTO> citiesPopulationData = apiClient.getCitiesPopulationData();
+    public List<CityPopulationData> getMostPopulatedCities(int cityNumber) {
+        List<CityPopulationData> citiesPopulationData = apiClient.getCitiesPopulationData();
         List<String> targetCountries = Arrays.asList("Italy", "New Zealand", "Ghana");
         citiesPopulationData = citiesPopulationData.stream()
                 .filter(city -> targetCountries.contains(city.getCountry()))

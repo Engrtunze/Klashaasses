@@ -1,9 +1,9 @@
 package com.countriesdata.assessment.service;
 
-import com.countriesdata.assessment.dto.CityPopulationDTO;
+import com.countriesdata.assessment.dto.CityPopulationData;
 
 import java.util.List;
 
 public interface CityService {
-    List<CityPopulationDTO> getMostPopulatedCities(int cityNumber);
+    List<CityPopulationData> getMostPopulatedCities(int cityNumber);
 }
