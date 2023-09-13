@@ -9,8 +9,8 @@ import java.util.List;
 @Data
 @Getter
 @Setter
-public class CityPopulationDTO {
-    private String city;
-    private  String country;
-    private List<PopulationCountDTO> populationCounts;
+public class ApiResponse<T> {
+    private boolean error;
+    private  String msg;
+    private List<T> data;
 }

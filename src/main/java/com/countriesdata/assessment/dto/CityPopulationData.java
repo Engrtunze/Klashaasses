@@ -9,8 +9,8 @@ import java.util.List;
 @Data
 @Getter
 @Setter
-public class CityPopulationResponse {
-    private boolean error;
-    private  String msg;
-    private List<CityPopulationDTO> data;
+public class CityPopulationData {
+    private String city;
+    private  String country;
+    private List<PopulationCountData> populationCounts;
 }
