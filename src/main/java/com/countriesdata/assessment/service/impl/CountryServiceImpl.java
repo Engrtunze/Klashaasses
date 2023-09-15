@@ -1,7 +1,10 @@
 package com.countriesdata.assessment.service.impl;
 
 import com.countriesdata.assessment.config.ApiClient;
+import com.countriesdata.assessment.config.ReadFile;
 import com.countriesdata.assessment.dto.CountryCapitalData;
+import com.countriesdata.assessment.dto.CountryCurrencyConversionDTO;
+import com.countriesdata.assessment.dto.CountryCurrencyConversionRequest;
 import com.countriesdata.assessment.dto.CountryCurrencyData;
 import com.countriesdata.assessment.dto.CountryGeneralDetailsDTO;
 import com.countriesdata.assessment.dto.CountryLocationData;
@@ -10,6 +13,7 @@ import com.countriesdata.assessment.service.CountryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +22,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CountryServiceImpl implements CountryService {
     private final ApiClient apiClient;
+    private final ReadFile readFile;
 
     @Override
     public CountryGeneralDetailsDTO getCountryDetails(String country) {
@@ -41,6 +46,36 @@ public class CountryServiceImpl implements CountryService {
                 .build();
     }
 
+    @Override
+    public CountryCurrencyConversionDTO covertCurrency(CountryCurrencyConversionRequest request) {
+        List<CountryCurrencyData> countryCurrencyData = apiClient.getCountriesAndCurries();
+        var currency = extractCountryCurrency(countryCurrencyData, request.getCountry());
+
+        if (currency.getCurrency() == null) {
+            //TODO Handle error: Country not found
+            return new CountryCurrencyConversionDTO("Country not found", null);
+        }
+
+        if (currency.getCurrency().equals(request.getTargetCurrency())) {
+            // Handle error: Same source and target currency
+            return new CountryCurrencyConversionDTO("Source and target currencies are the same", null);
+        }
+        // Get the exchange rate from the CSV file
+        double exchangeRate = readFile.getExchangeRate(currency.getCurrency(), request.getTargetCurrency());
+
+        if (exchangeRate == 0.0) {
+            //TODO Handle error: Exchange rate not found
+            return new CountryCurrencyConversionDTO("Exchange rate not found", null);
+        }
+
+        double convertedAmount = request.getAmount().doubleValue() * exchangeRate;
+
+        return CountryCurrencyConversionDTO.builder()
+                .countryCurrency(currency.getCurrency())
+                .convertedCurrencyValue(BigDecimal.valueOf(convertedAmount))
+                .build();
+
+    }
 
 
     static CountryCapitalData extractCountryCapital(List<CountryCapitalData> countryCapitalList, String countryName) {
