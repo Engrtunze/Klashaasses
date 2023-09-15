@@ -1,6 +1,7 @@
 package com.countriesdata.assessment.controllers;
 
 import com.countriesdata.assessment.dto.CityPopulationData;
+import com.countriesdata.assessment.dto.StateCityDTO;
 import com.countriesdata.assessment.service.CityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -19,5 +20,10 @@ public class CityController {
     @GetMapping(value = "/get-most-populated-city", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<CityPopulationData> getMostPopulatedCities(@RequestParam("number-of-city") int cityNumber){
         return cityService.getMostPopulatedCities(cityNumber);
+    }
+
+    @GetMapping(value = "/get-cities-in-states", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<StateCityDTO> getCitiesInState(@RequestParam("country") String country){
+        return cityService.getCitiesOfStates(country);
     }
 }
