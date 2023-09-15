@@ -9,9 +9,8 @@ Welcome to the Countries Data Assessment project! This project aims to provide d
 - [Installation](#installation)
 - [Usage](#usage)
 - [API Documentation](#api-documentation)
-- [Project Structure](#project-structure)
-- [Contributing](#contributing)
-- [License](#license)
+- [My Decisions and Improvements](#My-Decisions-and-Improvements)
+
 
 ## Getting Started
 
