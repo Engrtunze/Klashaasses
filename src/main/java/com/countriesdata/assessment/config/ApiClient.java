@@ -6,13 +6,23 @@ import com.countriesdata.assessment.dto.CountryCapitalData;
 import com.countriesdata.assessment.dto.CountryCurrencyData;
 import com.countriesdata.assessment.dto.CountryLocationData;
 import com.countriesdata.assessment.dto.CountryPopulationData;
+import com.countriesdata.assessment.dto.StateCityRequest;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -60,8 +70,89 @@ public class ApiClient {
                 appConfig.restTemplate().exchange(endpoint, HttpMethod.GET, null, new ParameterizedTypeReference<ApiResponse<CountryPopulationData>>() {});
         return Objects.requireNonNull(response.getBody()).getData();
     }
+    public List<String> getStates(String country) {
+        String endpoint =String.format("%s/%s/states/q?country=%s", devUrl, baseEndpoint, country);
+        ResponseEntity<String> responseEntity = sendGetRequest(endpoint);
+
+        if (responseEntity.getStatusCode() == HttpStatus.OK && responseEntity.getBody() != null) {
+            return extractStateNames(responseEntity.getBody());
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
+    private ResponseEntity<String> sendGetRequest(String endpoint) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+        return appConfig.restTemplate().exchange(endpoint, HttpMethod.GET, requestEntity, String.class);
+    }
+
+    private List<String> extractStateNames(String responseBody) {
+        List<String> stateNames = new ArrayList<>();
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode jsonNode = objectMapper.readTree(responseBody);
+            JsonNode dataNode = jsonNode.get("data");
+
+            if (dataNode != null) {
+                JsonNode statesNode = dataNode.get("states");
+
+                if (statesNode != null && statesNode.isArray()) {
+                    for (JsonNode stateNode : statesNode) {
+                        JsonNode nameNode = stateNode.get("name");
+
+                        if (nameNode != null) {
+                            stateNames.add(nameNode.asText());
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return stateNames;
+    }
 
 
+    public List<String> getCities(String country, String state){
+       String endpoint = String.format("%s/%s/state/cities/q?country=%s&state=%s", devUrl,baseEndpoint,country, state);
+        // Create the request body
+        StateCityRequest requestBody = new StateCityRequest();
+        requestBody.setCountry(country);
+        requestBody.setState(state);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<StateCityRequest> requestEntity = new HttpEntity<>(headers);
+        ResponseEntity<String> responseEntity = appConfig.restTemplate().exchange(
+                endpoint,
+                HttpMethod.GET,
+                requestEntity,
+                String.class
+        );
+        if (responseEntity.getStatusCode() == HttpStatus.OK && responseEntity.getBody() != null) {
+            String responseBody = responseEntity.getBody();
+            List<String> cities = new ArrayList<>();
 
+            try {
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode jsonNode = objectMapper.readTree(responseBody);
+                JsonNode dataNode = jsonNode.get("data");
+                if (dataNode != null && dataNode.isArray()) {
+                    for (JsonNode cityNode : dataNode) {
+                        cities.add(cityNode.asText());
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
+            return cities;
+        } else {
+            //TODO Handle error case or empty data, e.g., by returning an empty list
+            return Collections.emptyList();
+        }
+    }
 }
