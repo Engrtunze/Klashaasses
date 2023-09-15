@@ -34,7 +34,7 @@ These instructions will help you get the project up and running on your local ma
 2. Change directory to the project folder:
 
    ```shell
-   cd countries-data-assessment
+   cd Klashaasses
    ```
 
 3. Build the project:
