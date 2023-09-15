@@ -7,6 +7,7 @@ import com.countriesdata.assessment.dto.CountryCurrencyData;
 import com.countriesdata.assessment.dto.CountryLocationData;
 import com.countriesdata.assessment.dto.CountryPopulationData;
 import com.countriesdata.assessment.dto.StateCityRequest;
+import com.countriesdata.assessment.exceptions.BadRequestException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,6 @@ import org.springframework.http.ResponseEntity;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -77,7 +77,7 @@ public class ApiClient {
         if (responseEntity.getStatusCode() == HttpStatus.OK && responseEntity.getBody() != null) {
             return extractStateNames(responseEntity.getBody());
         } else {
-            return Collections.emptyList();
+            throw new BadRequestException("Something went wrong please try again later");
         }
     }
 
@@ -151,8 +151,7 @@ public class ApiClient {
 
             return cities;
         } else {
-            //TODO Handle error case or empty data, e.g., by returning an empty list
-            return Collections.emptyList();
+           throw new BadRequestException("Something went wrong please try again later");
         }
     }
 }

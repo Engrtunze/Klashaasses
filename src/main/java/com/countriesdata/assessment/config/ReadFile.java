@@ -17,13 +17,14 @@ public class ReadFile {
     @Value("${exchange.rate.file}")
     private String exchangeRateFile;
     private final Map<String, Double> exchangeRates = new HashMap<>();
+
     @PostConstruct
-    private void init() {
+    private void init() throws IOException {
         try {
             printCsvFileContents();
             loadExchangeRatesFromFile(exchangeRateFile);
         } catch (IOException e) {
-            //TODO Handle the exception as needed
+            throw  new IOException(e);
         }
     }
 

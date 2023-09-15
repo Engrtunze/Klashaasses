@@ -9,6 +9,8 @@ import com.countriesdata.assessment.dto.CountryCurrencyData;
 import com.countriesdata.assessment.dto.CountryGeneralDetailsDTO;
 import com.countriesdata.assessment.dto.CountryLocationData;
 import com.countriesdata.assessment.dto.CountryPopulationData;
+import com.countriesdata.assessment.exceptions.BadRequestException;
+import com.countriesdata.assessment.exceptions.NotFoundException;
 import com.countriesdata.assessment.service.CountryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -52,20 +54,17 @@ public class CountryServiceImpl implements CountryService {
         var currency = extractCountryCurrency(countryCurrencyData, request.getCountry());
 
         if (currency.getCurrency() == null) {
-            //TODO Handle error: Country not found
-            return new CountryCurrencyConversionDTO("Country not found", null);
+
+            throw new NotFoundException("currency cannot be found/ does not exist");
         }
 
         if (currency.getCurrency().equals(request.getTargetCurrency())) {
-            // Handle error: Same source and target currency
-            return new CountryCurrencyConversionDTO("Source and target currencies are the same", null);
+            throw new BadRequestException("Source and target currencies are the same");
         }
-        // Get the exchange rate from the CSV file
         double exchangeRate = readFile.getExchangeRate(currency.getCurrency(), request.getTargetCurrency());
 
         if (exchangeRate == 0.0) {
-            //TODO Handle error: Exchange rate not found
-            return new CountryCurrencyConversionDTO("Exchange rate not found", null);
+           throw new BadRequestException("Exchange rate not found");
         }
 
         double convertedAmount = request.getAmount().doubleValue() * exchangeRate;
@@ -74,7 +73,6 @@ public class CountryServiceImpl implements CountryService {
                 .countryCurrency(currency.getCurrency())
                 .convertedCurrencyValue(BigDecimal.valueOf(convertedAmount))
                 .build();
-
     }
 
 
@@ -87,7 +85,7 @@ public class CountryServiceImpl implements CountryService {
         var countryData =  countryDataMap.get(countryName);
 
         if (countryData == null) {
-            //TODO handle exception
+            throw new NotFoundException("Country name does not exist");
         }
         return countryData;
 
@@ -101,7 +99,7 @@ public class CountryServiceImpl implements CountryService {
         var populationData =  countryPopulationDataMap.get(countryName);
 
         if (populationData == null) {
-            //TODO handle exception
+            throw new NotFoundException("Population not found");
         }
         return populationData;
     }
@@ -116,7 +114,7 @@ public class CountryServiceImpl implements CountryService {
          var locationData =  countryLocationDataMap.get(countryName);
 
          if (locationData == null) {
-             //TODO handle exception
+             throw new NotFoundException("Location not found");
          }
          return locationData;
     }
@@ -131,7 +129,7 @@ public class CountryServiceImpl implements CountryService {
         var currencyData =  countryCurrencyDataMap.get(countryName);
 
         if (currencyData == null) {
-            //TODO handle exception
+            throw new NotFoundException("Currency not found");
         }
         return currencyData;
     }
