@@ -53,11 +53,6 @@ public class CountryServiceImpl implements CountryService {
         List<CountryCurrencyData> countryCurrencyData = apiClient.getCountriesAndCurries();
         var currency = extractCountryCurrency(countryCurrencyData, request.getCountry());
 
-        if (currency.getCurrency() == null) {
-
-            throw new NotFoundException("currency cannot be found/ does not exist");
-        }
-
         if (currency.getCurrency().equals(request.getTargetCurrency())) {
             throw new BadRequestException("Source and target currencies are the same");
         }
