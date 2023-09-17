@@ -191,7 +191,6 @@ public class ApiClient {
 
     public List<String> getCities(String country, String state){
        String endpoint = String.format("%s/%s/state/cities/q?country=%s&state=%s", devUrl,baseEndpoint,country, state);
-        // Create the request body
         StateCityRequest requestBody = new StateCityRequest();
         requestBody.setCountry(country);
         requestBody.setState(state);
