@@ -8,6 +8,7 @@ import com.countriesdata.assessment.dto.CountryLocationData;
 import com.countriesdata.assessment.dto.CountryPopulationData;
 import com.countriesdata.assessment.dto.StateCityRequest;
 import com.countriesdata.assessment.exceptions.BadRequestException;
+import com.countriesdata.assessment.service.util.HelperUtility;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -35,53 +36,124 @@ public class ApiClient {
     private  String baseEndpoint;
 
     private final AppConfig appConfig;
+    private final HelperUtility helperUtility;
+
+
 
     public List<CityPopulationData> getCitiesPopulationData(){
-        String endpoint = String.format("%s/%s/population/cities", devUrl,baseEndpoint);
-        ResponseEntity<ApiResponse<CityPopulationData>> response =
-                appConfig.restTemplate().exchange(endpoint, HttpMethod.GET, null, new ParameterizedTypeReference<ApiResponse<CityPopulationData>>() {});
-        return Objects.requireNonNull(response.getBody()).getData();
-    }
-
-    public List<CountryCurrencyData> getCountriesAndCurries(){
-        String endpoint = String.format("%s/%s/currency", devUrl,baseEndpoint);
-        ResponseEntity<ApiResponse<CountryCurrencyData>> response =
-                appConfig.restTemplate().exchange(endpoint, HttpMethod.GET, null, new ParameterizedTypeReference<ApiResponse<CountryCurrencyData>>() {});
-        return Objects.requireNonNull(response.getBody()).getData();
-    }
-
-    public List<CountryCapitalData> getCountryCapital(){
-        String endpoint = String.format("%s/%s/capital", devUrl,baseEndpoint);
-        ResponseEntity<ApiResponse<CountryCapitalData>> response =
-                appConfig.restTemplate().exchange(endpoint, HttpMethod.GET, null, new ParameterizedTypeReference<ApiResponse<CountryCapitalData>>() {});
-        return Objects.requireNonNull(response.getBody()).getData();
-    }
-
-    public List<CountryLocationData> getCountryLocation(){
-        String endpoint = String.format("%s/%s/positions", devUrl,baseEndpoint);
-        ResponseEntity<ApiResponse<CountryLocationData>> response =
-                appConfig.restTemplate().exchange(endpoint, HttpMethod.GET, null, new ParameterizedTypeReference<ApiResponse<CountryLocationData>>() {});
-        return Objects.requireNonNull(response.getBody()).getData();
-    }
-
-    public List<CountryPopulationData> getCountryPopulation(){
-        String endpoint = String.format("%s/%s/population", devUrl,baseEndpoint);
-        ResponseEntity<ApiResponse<CountryPopulationData>> response =
-                appConfig.restTemplate().exchange(endpoint, HttpMethod.GET, null, new ParameterizedTypeReference<ApiResponse<CountryPopulationData>>() {});
-        return Objects.requireNonNull(response.getBody()).getData();
-    }
-    public List<String> getStates(String country) {
-        String endpoint =String.format("%s/%s/states/q?country=%s", devUrl, baseEndpoint, country);
-        ResponseEntity<String> responseEntity = sendGetRequest(endpoint);
-
-        if (responseEntity.getStatusCode() == HttpStatus.OK && responseEntity.getBody() != null) {
-            return extractStateNames(responseEntity.getBody());
-        } else {
-            throw new BadRequestException("Something went wrong please try again later");
+        String cacheKey = "citiesPopulationData";
+        List<CityPopulationData> cityPopulationCachedData = helperUtility.getCachedData(cacheKey, CityPopulationData.class);
+        if(cityPopulationCachedData != null){
+            return  cityPopulationCachedData;
+        }else {
+            String endpoint = String.format("%s/%s/population/cities", devUrl,baseEndpoint);
+            ResponseEntity<ApiResponse<CityPopulationData>> response =
+                    appConfig.restTemplate().exchange(
+                            endpoint,
+                            HttpMethod.GET,
+                            null,
+                            new ParameterizedTypeReference<ApiResponse<CityPopulationData>>() {});
+            List<CityPopulationData> responseData =  Objects.requireNonNull(response.getBody()).getData();
+            helperUtility.cacheData(responseData, cacheKey);
+            return responseData;
         }
     }
 
-    private ResponseEntity<String> sendGetRequest(String endpoint) {
+    public List<CountryCurrencyData> getCountriesAndCurries(){
+        String cacheKey = "countryCurrencyData";
+        List<CountryCurrencyData> countryCurrencyDataList = helperUtility.getCachedData(cacheKey, CountryCurrencyData.class);
+        if(countryCurrencyDataList != null){
+            return  countryCurrencyDataList;
+        }else {
+            String endpoint = String.format("%s/%s/currency", devUrl,baseEndpoint);
+            ResponseEntity<ApiResponse<CountryCurrencyData>> response =
+                    appConfig.restTemplate().exchange(
+                            endpoint,
+                            HttpMethod.GET,
+                            null,
+                            new ParameterizedTypeReference<ApiResponse<CountryCurrencyData>>() {});
+            List<CountryCurrencyData> responseData = Objects.requireNonNull(response.getBody()).getData();
+            helperUtility.cacheData(responseData,cacheKey);
+            return responseData;
+        }
+
+    }
+
+    public List<CountryCapitalData> getCountryCapital(){
+        String cacheKey = "countryCapitalData";
+        List<CountryCapitalData> countryCapitalDataList = helperUtility.getCachedData(cacheKey, CountryCapitalData.class);
+        if(countryCapitalDataList != null){
+            return  countryCapitalDataList;
+        }else {
+            String endpoint = String.format("%s/%s/capital", devUrl,baseEndpoint);
+            ResponseEntity<ApiResponse<CountryCapitalData>> response =
+                    appConfig.restTemplate().exchange(endpoint, HttpMethod.GET, null, new ParameterizedTypeReference<ApiResponse<CountryCapitalData>>() {});
+            List<CountryCapitalData> responseData = Objects.requireNonNull(response.getBody()).getData();
+            helperUtility.cacheData(responseData, cacheKey);
+            return responseData;
+        }
+
+    }
+
+    public List<CountryLocationData> getCountryLocation(){
+        String cacheKey = "countryLocation";
+        List<CountryLocationData> countryLocationDataList = helperUtility.getCachedData(cacheKey, CountryLocationData.class);
+        if(countryLocationDataList != null){
+            return  countryLocationDataList;
+        }else {
+            String endpoint = String.format("%s/%s/positions", devUrl,baseEndpoint);
+            ResponseEntity<ApiResponse<CountryLocationData>> response =
+                    appConfig.restTemplate().exchange(
+                            endpoint,
+                            HttpMethod.GET,
+                            null,
+                            new ParameterizedTypeReference<ApiResponse<CountryLocationData>>() {});
+            List<CountryLocationData> responseData = Objects.requireNonNull(response.getBody()).getData();
+            helperUtility.cacheData(responseData, cacheKey);
+            return responseData;
+        }
+
+    }
+
+    public List<CountryPopulationData> getCountryPopulation(){
+        String cacheKey = "countryPopulation";
+        List<CountryPopulationData> countryPopulationDataList = helperUtility.getCachedData(cacheKey, CountryPopulationData.class);
+        if(countryPopulationDataList != null){
+            return  countryPopulationDataList;
+        } else {
+            String endpoint = String.format("%s/%s/population", devUrl,baseEndpoint);
+            ResponseEntity<ApiResponse<CountryPopulationData>> response =
+                    appConfig.restTemplate().exchange(
+                            endpoint,
+                            HttpMethod.GET,
+                            null,
+                            new ParameterizedTypeReference<ApiResponse<CountryPopulationData>>() {});
+            List<CountryPopulationData> responseData = Objects.requireNonNull(response.getBody()).getData();
+            helperUtility.cacheData(responseData, cacheKey);
+            return responseData;
+        }
+
+    }
+    public List<String> getStates(String country) {
+        List<String> stateList = helperUtility.getCachedData(country, String.class);
+        if(stateList != null){
+            return  stateList;
+        }else {
+            String endpoint =String.format("%s/%s/states/q?country=%s", devUrl, baseEndpoint, country);
+            ResponseEntity<String> responseEntity = sendGetStateRequest(endpoint);
+
+            if (responseEntity.getStatusCode() == HttpStatus.OK && responseEntity.getBody() != null) {
+                List<String> responseData = extractStateNames(responseEntity.getBody());
+                helperUtility.cacheData(responseData, country);
+                return responseData;
+            } else {
+                throw new BadRequestException("Something went wrong please try again later");
+            }
+
+        }
+    }
+
+    private ResponseEntity<String> sendGetStateRequest(String endpoint) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> requestEntity = new HttpEntity<>(headers);
