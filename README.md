@@ -1,6 +1,6 @@
 # Countries Data Assessment Project 🌍
 
-Welcome to the Countries Data Assessment project! This project aims to provide data related to countries, states, cities, and currency conversions. Explore and contribute to make it even better! 🚀
+Welcome to the Countries Data Assessment project! This project aims to provide data related to countries, states, cities, and currency conversions. Have fun Exploring! 🚀
 
 ## Table of Contents
 
